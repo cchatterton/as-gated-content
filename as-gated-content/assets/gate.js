@@ -20,6 +20,9 @@
     var dialog = gate.querySelector('.asgc-gate__dialog');
     var closeButton = gate.querySelector('[data-asgc-close]');
     var hasDisplayed = false;
+    var hasExitIntentTriggered = false;
+    var lastMouseY = null;
+    var lastMouseMoveAt = 0;
     var previousFocus = null;
 
     function readState() {
@@ -105,9 +108,65 @@
     }
 
     function bindExitIntent() {
+        var topBoundary = 32;
+
+        function triggerExitIntent() {
+            if (hasExitIntentTriggered) {
+                return;
+            }
+
+            hasExitIntentTriggered = true;
+            maybeOpenGate();
+        }
+
+        function isMousePointer(event) {
+            return !event.pointerType || 'mouse' === event.pointerType;
+        }
+
+        document.addEventListener('mousemove', function (event) {
+            var previousMouseY = lastMouseY;
+
+            lastMouseY = event.clientY;
+            lastMouseMoveAt = Date.now();
+
+            if (null === previousMouseY) {
+                return;
+            }
+
+            if (event.clientY <= topBoundary && previousMouseY > event.clientY) {
+                triggerExitIntent();
+            }
+        }, { passive: true });
+
         document.addEventListener('mouseout', function (event) {
-            if (event.clientY <= 0 && !event.relatedTarget) {
-                maybeOpenGate();
+            if (event.relatedTarget || event.toElement) {
+                return;
+            }
+
+            if (event.clientY <= topBoundary) {
+                triggerExitIntent();
+            }
+        }, { passive: true });
+
+        document.addEventListener('mouseleave', function (event) {
+            if (event.clientY <= topBoundary) {
+                triggerExitIntent();
+            }
+        }, { passive: true });
+
+        if (window.PointerEvent) {
+            document.addEventListener('pointerleave', function (event) {
+                if (isMousePointer(event) && event.clientY <= topBoundary) {
+                    triggerExitIntent();
+                }
+            }, { passive: true });
+        }
+
+        window.addEventListener('blur', function () {
+            var pointerWasRecentlyNearTop = lastMouseY !== null && lastMouseY <= topBoundary && Date.now() - lastMouseMoveAt < 750;
+
+            if (pointerWasRecentlyNearTop) {
+                triggerExitIntent();
             }
         });
     }

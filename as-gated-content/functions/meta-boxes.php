@@ -45,11 +45,11 @@ function asgc_register_acf_fields(): void
     acf_add_local_field_group(
         array(
             'key'      => 'group_asgc_gate_settings',
-            'title'    => __('Gate Settings', 'as-gated-conten'),
+            'title'    => __('Gate Settings', 'as-gated-content'),
             'fields'   => array(
                 array(
                     'key'           => 'field_asgc_gate_gravity_form_id',
-                    'label'         => __('Gravity Form', 'as-gated-conten'),
+                    'label'         => __('Gravity Form', 'as-gated-content'),
                     'name'          => 'asgc_gate_gravity_form_id',
                     'type'          => 'select',
                     'required'      => 1,
@@ -60,14 +60,14 @@ function asgc_register_acf_fields(): void
                 ),
                 array(
                     'key'           => 'field_asgc_gate_overlay_mode',
-                    'label'         => __('Overlay Mode', 'as-gated-conten'),
+                    'label'         => __('Overlay Mode', 'as-gated-content'),
                     'name'          => 'asgc_gate_overlay_mode',
                     'type'          => 'hidden',
                     'default_value' => 'fullscreen',
                 ),
                 array(
                     'key'     => 'field_asgc_gate_entries_link',
-                    'label'   => __('View Entries', 'as-gated-conten'),
+                    'label'   => __('View Entries', 'as-gated-content'),
                     'name'    => 'asgc_gate_entries_link',
                     'type'    => 'message',
                     'message' => asgc_get_gate_entries_message(),
@@ -88,7 +88,7 @@ function asgc_register_acf_fields(): void
     acf_add_local_field_group(
         array(
             'key'      => 'group_asgc_gate_rule_settings',
-            'title'    => __('Gate Rule Settings', 'as-gated-conten'),
+            'title'    => __('Gate Rule Settings', 'as-gated-content'),
             'fields'   => asgc_get_gate_configuration_fields('rule'),
             'location' => array(
                 array(
@@ -118,7 +118,7 @@ function asgc_register_acf_fields(): void
         acf_add_local_field_group(
             array(
                 'key'      => 'group_asgc_content_gate_settings',
-                'title'    => __('Gate Settings', 'as-gated-conten'),
+                'title'    => __('Gate Settings', 'as-gated-content'),
                 'fields'   => asgc_get_gate_configuration_fields('content'),
                 'location' => $content_locations,
             )
@@ -135,7 +135,7 @@ function asgc_get_gate_configuration_fields(string $context): array
     if ($is_rule) {
         $fields[] = array(
             'key'           => 'field_asgc_rule_post_type',
-            'label'         => __('Applies to content type', 'as-gated-conten'),
+            'label'         => __('Applies to content type', 'as-gated-content'),
             'name'          => 'asgc_rule_post_type',
             'type'          => 'select',
             'required'      => 1,
@@ -148,7 +148,7 @@ function asgc_get_gate_configuration_fields(string $context): array
 
     $fields[] = array(
         'key'           => 'field_' . $prefix . '_gate_id',
-        'label'         => __('Gate', 'as-gated-conten'),
+        'label'         => __('Gate', 'as-gated-content'),
         'name'          => $prefix . '_gate_id',
         'type'          => 'select',
         'required'      => $is_rule ? 1 : 0,
@@ -169,13 +169,13 @@ function asgc_get_gate_configuration_fields(string $context): array
 
     $fields[] = array(
         'key'               => 'field_' . $prefix . '_trigger',
-        'label'             => __('Trigger', 'as-gated-conten'),
+        'label'             => __('Trigger', 'as-gated-content'),
         'name'              => $prefix . '_trigger',
         'type'              => 'select',
         'required'          => $is_rule ? 1 : 0,
         'choices'           => array(
-            'entrance' => __('On entrance', 'as-gated-conten'),
-            'exit'     => __('On exit intent', 'as-gated-conten'),
+            'entrance' => __('On entrance', 'as-gated-content'),
+            'exit'     => __('On exit intent', 'as-gated-content'),
         ),
         'default_value'     => 'entrance',
         'allow_null'        => 0,
@@ -185,7 +185,7 @@ function asgc_get_gate_configuration_fields(string $context): array
 
     $fields[] = array(
         'key'               => 'field_' . $prefix . '_delay',
-        'label'             => __('Delay before showing', 'as-gated-conten'),
+        'label'             => __('Delay before showing', 'as-gated-content'),
         'name'              => $prefix . '_delay',
         'type'              => 'number',
         'required'          => $is_rule ? 1 : 0,
@@ -197,14 +197,14 @@ function asgc_get_gate_configuration_fields(string $context): array
 
     $fields[] = array(
         'key'               => 'field_' . $prefix . '_threshold',
-        'label'             => __('Trigger threshold', 'as-gated-conten'),
+        'label'             => __('Trigger threshold', 'as-gated-content'),
         'name'              => $prefix . '_threshold',
         'type'              => 'number',
         'required'          => $is_rule ? 1 : 0,
         'default_value'     => 0,
         'min'               => 0,
         'step'              => 1,
-        'instructions'      => __('Trigger threshold controls how many trigger events occur before the gate appears. 0 means show on the first trigger.', 'as-gated-conten'),
+        'instructions'      => __('Trigger threshold controls how many trigger events occur before the gate appears. 0 means show on the first trigger.', 'as-gated-content'),
         'conditional_logic' => $conditional_logic,
     );
 
@@ -217,7 +217,7 @@ function asgc_get_gate_entries_message(): string
     $form_id = $post_id > 0 ? asgc_get_gate_form_id($post_id) : 0;
 
     if ($form_id <= 0) {
-        return esc_html__('Select and save a Gravity Form to view entries.', 'as-gated-conten');
+        return esc_html__('Select and save a Gravity Form to view entries.', 'as-gated-content');
     }
 
     $url = admin_url('admin.php?page=gf_entries&id=' . $form_id);
@@ -225,7 +225,7 @@ function asgc_get_gate_entries_message(): string
     return sprintf(
         '<a href="%s">%s</a>',
         esc_url($url),
-        esc_html__('View Entries', 'as-gated-conten')
+        esc_html__('View Entries', 'as-gated-content')
     );
 }
 
@@ -259,7 +259,7 @@ function asgc_validate_gravity_form_field($valid, $value, array $field, string $
     $form_id = absint($value);
 
     if ($form_id <= 0 || !asgc_gravity_form_exists($form_id)) {
-        return __('Select an active Gravity Form.', 'as-gated-conten');
+        return __('Select an active Gravity Form.', 'as-gated-content');
     }
 
     return true;
@@ -274,7 +274,7 @@ function asgc_validate_gate_reference_field($valid, $value, array $field, string
     $gate_id = absint($value);
 
     if ($gate_id <= 0 || 'gate' !== get_post_type($gate_id)) {
-        return __('Select a valid Gate.', 'as-gated-conten');
+        return __('Select a valid Gate.', 'as-gated-content');
     }
 
     return true;
@@ -287,7 +287,7 @@ function asgc_validate_gate_rule_post_type_field($valid, $value, array $field, s
     }
 
     if (!array_key_exists((string) $value, asgc_get_public_content_post_types())) {
-        return __('Select a valid public content type.', 'as-gated-conten');
+        return __('Select a valid public content type.', 'as-gated-content');
     }
 
     return true;
@@ -317,7 +317,7 @@ function asgc_validate_unique_gate_rule_field($valid, $value, array $field, stri
     );
 
     if (!empty($existing_rules)) {
-        return __('A Gate Rule already exists for this content type.', 'as-gated-conten');
+        return __('A Gate Rule already exists for this content type.', 'as-gated-content');
     }
 
     return true;
@@ -330,7 +330,7 @@ function asgc_validate_trigger_field($valid, $value, array $field, string $input
     }
 
     if (!in_array($value, array('entrance', 'exit'), true)) {
-        return __('Select a valid trigger.', 'as-gated-conten');
+        return __('Select a valid trigger.', 'as-gated-content');
     }
 
     return true;
@@ -343,7 +343,7 @@ function asgc_validate_non_negative_integer_field($valid, $value, array $field, 
     }
 
     if ('' === $value || !is_numeric($value) || (int) $value < 0) {
-        return __('Enter a number greater than or equal to 0.', 'as-gated-conten');
+        return __('Enter a number greater than or equal to 0.', 'as-gated-content');
     }
 
     return true;

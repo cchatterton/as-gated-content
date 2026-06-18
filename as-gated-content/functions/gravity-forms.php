@@ -24,14 +24,14 @@ function asgc_show_dependency_admin_notices(): void
     if (!asgc_is_acf_available()) {
         printf(
             '<div class="notice notice-error"><p>%s</p></div>',
-            esc_html__('AS Gated Content requires ACF Pro. Fields are registered from code when ACF is active.', 'as-gated-conten')
+            esc_html__('AS Gated Content requires ACF Pro. Fields are registered from code when ACF is active.', 'as-gated-content')
         );
     }
 
     if (!asgc_is_gravity_forms_available()) {
         printf(
             '<div class="notice notice-error"><p>%s</p></div>',
-            esc_html__('AS Gated Content requires Gravity Forms. Gates are invalid until Gravity Forms is active and a form is selected.', 'as-gated-conten')
+            esc_html__('AS Gated Content requires Gravity Forms. Gates are invalid until Gravity Forms is active and a form is selected.', 'as-gated-content')
         );
     }
 }
@@ -53,7 +53,7 @@ function asgc_add_gate_context_hidden_field(array $form): array
             'type'       => 'hidden',
             'id'         => asgc_get_next_gravity_form_field_id($form),
             'formId'     => isset($form['id']) ? absint($form['id']) : 0,
-            'label'      => __('Gate ID', 'as-gated-conten'),
+            'label'      => __('Gate ID', 'as-gated-content'),
             'inputName'  => 'asgc_gate_id',
             'allowsPrepopulate' => true,
         )

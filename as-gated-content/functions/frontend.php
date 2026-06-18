@@ -150,7 +150,7 @@ function asgc_render_frontend_gate(): void
         aria-hidden="true"
     >
         <div class="asgc-gate__dialog" role="dialog" aria-modal="true" aria-labelledby="asgc-gate-title-<?php echo esc_attr((string) $gate_id); ?>" tabindex="-1">
-            <button class="asgc-gate__close" type="button" data-asgc-close aria-label="<?php esc_attr_e('Close gate', 'as-gated-conten'); ?>">
+            <button class="asgc-gate__close" type="button" data-asgc-close aria-label="<?php esc_attr_e('Close gate', 'as-gated-content'); ?>">
                 <span aria-hidden="true">&times;</span>
             </button>
             <div class="asgc-gate__content">

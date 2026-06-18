@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PLUGIN_SLUG="as-gated-conten"
+PLUGIN_SLUG="as-gated-content"
 DIST_DIR="dist"
 
 cd "$(dirname "$0")/.."

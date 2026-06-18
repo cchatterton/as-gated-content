@@ -189,7 +189,7 @@ function asgc_github_plugin_information($result, string $action, object $args)
         'requires'      => '6.0',
         'requires_php'  => '8.1',
         'sections'      => array(
-            'description' => __('Reusable gated content overlays powered by ACF Pro and Gravity Forms.', 'as-gated-conten'),
+            'description' => __('Reusable gated content overlays powered by ACF Pro and Gravity Forms.', 'as-gated-content'),
             'changelog'   => wp_kses_post((string) ($release['body'] ?? '')),
         ),
     );
@@ -207,12 +207,12 @@ function asgc_add_plugin_row_meta(array $links, string $file): array
     $links[] = sprintf(
         '<a href="%s">%s</a>',
         esc_url('https://github.com/' . ASGC_GITHUB_OWNER . '/' . ASGC_GITHUB_REPO),
-        esc_html__('GitHub', 'as-gated-conten')
+        esc_html__('GitHub', 'as-gated-content')
     );
     $links[] = sprintf(
         '<a href="%s">%s</a>',
         esc_url($check_url),
-        esc_html__('Check for updates', 'as-gated-conten')
+        esc_html__('Check for updates', 'as-gated-content')
     );
 
     return $links;
@@ -225,7 +225,7 @@ function asgc_handle_manual_update_check(): void
     }
 
     if (!current_user_can('update_plugins')) {
-        wp_die(esc_html__('You do not have permission to check plugin updates.', 'as-gated-conten'));
+        wp_die(esc_html__('You do not have permission to check plugin updates.', 'as-gated-content'));
     }
 
     check_admin_referer('asgc_check_updates');

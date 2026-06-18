@@ -59,7 +59,7 @@ function asgc_get_gate_choices(bool $valid_only = false): array
             continue;
         }
 
-        $choices[$gate_id] = get_the_title($gate_id) ?: sprintf(__('Gate #%d', 'as-gated-conten'), $gate_id);
+        $choices[$gate_id] = get_the_title($gate_id) ?: sprintf(__('Gate #%d', 'as-gated-content'), $gate_id);
     }
 
     return $choices;
@@ -81,7 +81,7 @@ function asgc_get_gravity_form_choices(): array
             continue;
         }
 
-        $choices[$form_id] = isset($form['title']) ? sanitize_text_field((string) $form['title']) : sprintf(__('Form #%d', 'as-gated-conten'), $form_id);
+        $choices[$form_id] = isset($form['title']) ? sanitize_text_field((string) $form['title']) : sprintf(__('Form #%d', 'as-gated-content'), $form_id);
     }
 
     return $choices;
