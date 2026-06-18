@@ -20,9 +20,10 @@
     var dialog = gate.querySelector('.asgc-gate__dialog');
     var closeButton = gate.querySelector('[data-asgc-close]');
     var hasDisplayed = false;
-    var hasExitIntentTriggered = false;
+    var openTimer = null;
     var lastMouseY = null;
     var lastMouseMoveAt = 0;
+    var lastExitIntentAt = 0;
     var previousFocus = null;
 
     function readState() {
@@ -104,18 +105,37 @@
             return;
         }
 
-        window.setTimeout(openGate, Math.max(0, config.delay) * 1000);
+        if (openTimer) {
+            return;
+        }
+
+        openTimer = window.setTimeout(function () {
+            openTimer = null;
+            openGate();
+        }, Math.max(0, config.delay) * 1000);
     }
 
     function bindExitIntent() {
-        var topBoundary = 32;
+        var triggerDebounce = 750;
+        var html = document.documentElement;
+
+        function getTopBoundary() {
+            var adminBar = document.getElementById('wpadminbar');
+            var adminBarHeight = adminBar ? adminBar.getBoundingClientRect().height : 0;
+
+            return adminBarHeight + 80;
+        }
 
         function triggerExitIntent() {
-            if (hasExitIntentTriggered) {
+            if (hasDisplayed || isSubmitted()) {
                 return;
             }
 
-            hasExitIntentTriggered = true;
+            if (Date.now() - lastExitIntentAt < triggerDebounce) {
+                return;
+            }
+
+            lastExitIntentAt = Date.now();
             maybeOpenGate();
         }
 
@@ -125,6 +145,7 @@
 
         document.addEventListener('mousemove', function (event) {
             var previousMouseY = lastMouseY;
+            var topBoundary = getTopBoundary();
 
             lastMouseY = event.clientY;
             lastMouseMoveAt = Date.now();
@@ -133,36 +154,43 @@
                 return;
             }
 
-            if (event.clientY <= topBoundary && previousMouseY > event.clientY) {
+            if (event.clientY <= topBoundary && previousMouseY - event.clientY >= 4) {
                 triggerExitIntent();
             }
         }, { passive: true });
 
         document.addEventListener('mouseout', function (event) {
+            var topBoundary = getTopBoundary();
+
             if (event.relatedTarget || event.toElement) {
                 return;
             }
 
-            if (event.clientY <= topBoundary) {
+            if (event.clientY <= topBoundary || event.clientY <= 0) {
                 triggerExitIntent();
             }
         }, { passive: true });
 
-        document.addEventListener('mouseleave', function (event) {
-            if (event.clientY <= topBoundary) {
+        html.addEventListener('mouseleave', function (event) {
+            var topBoundary = getTopBoundary();
+
+            if (event.clientY <= topBoundary || event.clientY <= 0) {
                 triggerExitIntent();
             }
         }, { passive: true });
 
         if (window.PointerEvent) {
-            document.addEventListener('pointerleave', function (event) {
-                if (isMousePointer(event) && event.clientY <= topBoundary) {
+            html.addEventListener('pointerleave', function (event) {
+                var topBoundary = getTopBoundary();
+
+                if (isMousePointer(event) && (event.clientY <= topBoundary || event.clientY <= 0)) {
                     triggerExitIntent();
                 }
             }, { passive: true });
         }
 
         window.addEventListener('blur', function () {
+            var topBoundary = getTopBoundary();
             var pointerWasRecentlyNearTop = lastMouseY !== null && lastMouseY <= topBoundary && Date.now() - lastMouseMoveAt < 750;
 
             if (pointerWasRecentlyNearTop) {

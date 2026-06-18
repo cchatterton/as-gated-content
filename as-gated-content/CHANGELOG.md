@@ -2,6 +2,12 @@
 
 All notable changes to AS Gated Content are recorded here.
 
+## 0.1.2 - 2026-06-18
+
+- Fixed exit-intent threshold handling so repeated leave attempts can count until the modal opens.
+- Made desktop exit-intent detection more forgiving near the top of the viewport, including when the WordPress admin bar is visible.
+- Added a softer fade-in and dialog entrance transition for the gate overlay.
+
 ## 0.1.1 - 2026-06-18
 
 - Renamed plugin slug, package, and GitHub release target to as-gated-content.
