@@ -31,6 +31,8 @@ function asgc_prepare_frontend_gate(): void
         return;
     }
 
+    $gate_config['debug'] = asgc_frontend_gate_debug_enabled();
+    $gate_config['preview'] = asgc_frontend_gate_preview_enabled();
     $GLOBALS['asgc_frontend_gate'] = $gate_config;
 }
 
@@ -384,6 +386,16 @@ function asgc_enqueue_frontend_assets(): void
     );
 }
 
+function asgc_frontend_gate_debug_enabled(): bool
+{
+    return current_user_can('edit_posts') && isset($_GET['asgc_gate_debug']) && '1' === sanitize_text_field(wp_unslash($_GET['asgc_gate_debug']));
+}
+
+function asgc_frontend_gate_preview_enabled(): bool
+{
+    return current_user_can('edit_posts') && isset($_GET['asgc_gate_preview']) && '1' === sanitize_text_field(wp_unslash($_GET['asgc_gate_preview']));
+}
+
 function asgc_render_frontend_gate(): void
 {
     if (empty($GLOBALS['asgc_frontend_gate']) || !is_array($GLOBALS['asgc_frontend_gate'])) {
@@ -409,6 +421,8 @@ function asgc_render_frontend_gate(): void
         data-trigger="<?php echo esc_attr($config['trigger']); ?>"
         data-delay="<?php echo esc_attr((string) absint($config['delay'])); ?>"
         data-threshold="<?php echo esc_attr((string) absint($config['threshold'])); ?>"
+        data-debug-mode="<?php echo !empty($config['debug']) ? '1' : '0'; ?>"
+        data-preview-mode="<?php echo !empty($config['preview']) ? '1' : '0'; ?>"
         aria-hidden="true"
     >
         <div class="asgc-gate__dialog" role="dialog" aria-modal="true" aria-labelledby="asgc-gate-title-<?php echo esc_attr((string) $gate_id); ?>" tabindex="-1">
@@ -426,6 +440,29 @@ function asgc_render_frontend_gate(): void
             </div>
         </div>
     </div>
+    <?php if (!empty($config['debug'])) : ?>
+        <aside class="asgc-gate-debug" data-asgc-debug>
+            <strong><?php esc_html_e('AS Gate Debug', 'as-gated-content'); ?></strong>
+            <dl>
+                <dt><?php esc_html_e('Source', 'as-gated-content'); ?></dt>
+                <dd><?php echo esc_html((string) ($config['source'] ?? '')); ?></dd>
+                <dt><?php esc_html_e('Gate', 'as-gated-content'); ?></dt>
+                <dd><?php echo esc_html((string) $gate_id . ' - ' . get_the_title($gate_id)); ?></dd>
+                <dt><?php esc_html_e('Form', 'as-gated-content'); ?></dt>
+                <dd><?php echo esc_html((string) $form_id); ?></dd>
+                <dt><?php esc_html_e('Rule', 'as-gated-content'); ?></dt>
+                <dd><?php echo esc_html((string) absint($config['rule_id'] ?? 0)); ?></dd>
+                <dt><?php esc_html_e('Trigger', 'as-gated-content'); ?></dt>
+                <dd><?php echo esc_html((string) $config['trigger']); ?></dd>
+                <dt><?php esc_html_e('Delay', 'as-gated-content'); ?></dt>
+                <dd><?php echo esc_html((string) absint($config['delay'])); ?></dd>
+                <dt><?php esc_html_e('Threshold', 'as-gated-content'); ?></dt>
+                <dd><?php echo esc_html((string) absint($config['threshold'])); ?></dd>
+            </dl>
+            <button type="button" data-asgc-debug-show><?php esc_html_e('Show gate', 'as-gated-content'); ?></button>
+            <button type="button" data-asgc-debug-reset><?php esc_html_e('Reset browser state', 'as-gated-content'); ?></button>
+        </aside>
+    <?php endif; ?>
     <?php
     unset($GLOBALS['asgc_current_gate_id']);
 }

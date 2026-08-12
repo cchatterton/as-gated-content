@@ -14,11 +14,14 @@
         formId: gate.getAttribute('data-form-id'),
         trigger: gate.getAttribute('data-trigger') || 'entrance',
         delay: parseInt(gate.getAttribute('data-delay') || '0', 10),
-        threshold: parseInt(gate.getAttribute('data-threshold') || '0', 10)
+        threshold: parseInt(gate.getAttribute('data-threshold') || '0', 10),
+        debugMode: gate.getAttribute('data-debug-mode') === '1',
+        previewMode: gate.getAttribute('data-preview-mode') === '1'
     };
 
     var dialog = gate.querySelector('.asgc-gate__dialog');
     var closeButton = gate.querySelector('[data-asgc-close]');
+    var debugPanel = document.querySelector('[data-asgc-debug]');
     var hasDisplayed = false;
     var openTimer = null;
     var lastMouseY = null;
@@ -55,11 +58,19 @@
     }
 
     function isSubmitted() {
+        if (config.previewMode) {
+            return false;
+        }
+
         var state = readState();
         return !!(state.submitted && state.submitted[config.gateId]);
     }
 
     function recordTriggerAndShouldShow() {
+        if (config.previewMode) {
+            return true;
+        }
+
         var state = readState();
         var triggerKey = getTriggerKey();
 
@@ -113,6 +124,36 @@
             openTimer = null;
             openGate();
         }, Math.max(0, config.delay) * 1000);
+    }
+
+    function resetBrowserState() {
+        var state = readState();
+
+        state.submitted = state.submitted || {};
+        state.triggers = state.triggers || {};
+        delete state.submitted[config.gateId];
+        delete state.triggers[getTriggerKey()];
+        writeState(state);
+    }
+
+    function bindDebugPanel() {
+        if (!debugPanel) {
+            return;
+        }
+
+        var showButton = debugPanel.querySelector('[data-asgc-debug-show]');
+        var resetButton = debugPanel.querySelector('[data-asgc-debug-reset]');
+
+        if (showButton) {
+            showButton.addEventListener('click', function () {
+                resetBrowserState();
+                openGate();
+            });
+        }
+
+        if (resetButton) {
+            resetButton.addEventListener('click', resetBrowserState);
+        }
     }
 
     function bindExitIntent() {
@@ -203,6 +244,8 @@
         closeButton.addEventListener('click', closeGate);
     }
 
+    bindDebugPanel();
+
     document.addEventListener('keydown', function (event) {
         if ('Escape' === event.key && gate.classList.contains('is-open')) {
             closeGate();
@@ -229,7 +272,19 @@
 
     observer.observe(gate, { childList: true, subtree: true });
 
+    if (config.debugMode && window.console) {
+        window.console.info('AS Gate resolved', config, readState());
+    }
+
+    if (config.previewMode) {
+        window.setTimeout(openGate, 250);
+        return;
+    }
+
     if (isSubmitted()) {
+        if (config.debugMode && window.console) {
+            window.console.info('AS Gate suppressed because this gate is marked submitted in localStorage.');
+        }
         return;
     }
 

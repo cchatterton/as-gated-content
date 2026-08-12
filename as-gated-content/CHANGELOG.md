@@ -2,6 +2,11 @@
 
 All notable changes to AS Gated Content are recorded here.
 
+## 0.2.4 - 2026-08-13
+
+- Added admin-only front-end gate debug and preview controls.
+- Added a browser-state reset action for gate testing.
+
 ## 0.2.3 - 2026-08-13
 
 - Replaced separate rule condition repeaters with a single Conditions repeater for category and meta matches.
