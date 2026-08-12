@@ -222,21 +222,64 @@ function asgc_get_gate_configuration_fields(string $context): array
             'ui'            => 0,
         );
         $fields[] = array(
-            'key'          => 'field_asgc_rule_meta_conditions',
-            'label'        => __('Meta conditions', 'as-gated-content'),
-            'name'         => 'asgc_rule_meta_conditions',
+            'key'          => 'field_asgc_rule_conditions',
+            'label'        => __('Conditions', 'as-gated-content'),
+            'name'         => 'asgc_rule_conditions',
             'type'         => 'repeater',
             'layout'       => 'table',
-            'button_label' => __('Add meta condition', 'as-gated-content'),
+            'button_label' => __('Add condition', 'as-gated-content'),
             'sub_fields'   => array(
                 array(
-                    'key'   => 'field_asgc_rule_meta_condition_key',
+                    'key'           => 'field_asgc_rule_condition_type',
+                    'label'         => __('Type', 'as-gated-content'),
+                    'name'          => 'type',
+                    'type'          => 'select',
+                    'choices'       => array(
+                        'category' => __('Category', 'as-gated-content'),
+                        'meta'     => __('Meta', 'as-gated-content'),
+                    ),
+                    'default_value' => 'meta',
+                    'return_format' => 'value',
+                ),
+                array(
+                    'key'               => 'field_asgc_rule_condition_category',
+                    'label'             => __('Category', 'as-gated-content'),
+                    'name'              => 'category',
+                    'type'              => 'taxonomy',
+                    'taxonomy'          => 'category',
+                    'field_type'        => 'select',
+                    'return_format'     => 'id',
+                    'add_term'          => 0,
+                    'save_terms'        => 0,
+                    'load_terms'        => 0,
+                    'allow_null'        => 1,
+                    'conditional_logic' => array(
+                        array(
+                            array(
+                                'field'    => 'field_asgc_rule_condition_type',
+                                'operator' => '==',
+                                'value'    => 'category',
+                            ),
+                        ),
+                    ),
+                ),
+                array(
+                    'key'               => 'field_asgc_rule_condition_meta_key',
                     'label' => __('Meta key', 'as-gated-content'),
                     'name'  => 'key',
                     'type'  => 'text',
+                    'conditional_logic' => array(
+                        array(
+                            array(
+                                'field'    => 'field_asgc_rule_condition_type',
+                                'operator' => '==',
+                                'value'    => 'meta',
+                            ),
+                        ),
+                    ),
                 ),
                 array(
-                    'key'           => 'field_asgc_rule_meta_condition_operator',
+                    'key'           => 'field_asgc_rule_condition_operator',
                     'label'         => __('Operator', 'as-gated-content'),
                     'name'          => 'operator',
                     'type'          => 'select',
@@ -252,44 +295,30 @@ function asgc_get_gate_configuration_fields(string $context): array
                     ),
                     'default_value' => 'equals',
                     'return_format' => 'value',
-                ),
-                array(
-                    'key'   => 'field_asgc_rule_meta_condition_value',
-                    'label' => __('Value', 'as-gated-content'),
-                    'name'  => 'value',
-                    'type'  => 'text',
-                ),
-            ),
-        );
-        $fields[] = array(
-            'key'               => 'field_asgc_rule_category_conditions',
-            'label'             => __('Category conditions', 'as-gated-content'),
-            'name'              => 'asgc_rule_category_conditions',
-            'type'              => 'repeater',
-            'layout'            => 'table',
-            'button_label'      => __('Add category condition', 'as-gated-content'),
-            'conditional_logic' => array(
-                array(
-                    array(
-                        'field'    => 'field_asgc_rule_post_type',
-                        'operator' => '==',
-                        'value'    => 'post',
+                    'conditional_logic' => array(
+                        array(
+                            array(
+                                'field'    => 'field_asgc_rule_condition_type',
+                                'operator' => '==',
+                                'value'    => 'meta',
+                            ),
+                        ),
                     ),
                 ),
-            ),
-            'sub_fields'        => array(
                 array(
-                    'key'           => 'field_asgc_rule_category_condition_category',
-                    'label'         => __('Category', 'as-gated-content'),
-                    'name'          => 'category',
-                    'type'          => 'taxonomy',
-                    'taxonomy'      => 'category',
-                    'field_type'    => 'select',
-                    'return_format' => 'id',
-                    'add_term'      => 0,
-                    'save_terms'    => 0,
-                    'load_terms'    => 0,
-                    'allow_null'    => 1,
+                    'key'               => 'field_asgc_rule_condition_value',
+                    'label'             => __('Value', 'as-gated-content'),
+                    'name'              => 'value',
+                    'type'              => 'text',
+                    'conditional_logic' => array(
+                        array(
+                            array(
+                                'field'    => 'field_asgc_rule_condition_type',
+                                'operator' => '==',
+                                'value'    => 'meta',
+                            ),
+                        ),
+                    ),
                 ),
             ),
         );

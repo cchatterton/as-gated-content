@@ -188,11 +188,7 @@ function asgc_rule_matches_post(int $rule_id, int $post_id): bool
         return false;
     }
 
-    if (!asgc_rule_category_conditions_match($rule_id, $post_id)) {
-        return false;
-    }
-
-    return asgc_rule_meta_conditions_match($rule_id, $post_id);
+    return asgc_rule_conditions_match($rule_id, $post_id);
 }
 
 function asgc_rule_is_active(int $rule_id): bool
@@ -206,48 +202,11 @@ function asgc_rule_is_active(int $rule_id): bool
     return (bool) $active;
 }
 
-function asgc_rule_category_conditions_match(int $rule_id, int $post_id): bool
+function asgc_rule_conditions_match(int $rule_id, int $post_id): bool
 {
-    if ('post' !== get_post_type($post_id)) {
-        return true;
-    }
+    $conditions = asgc_get_rule_conditions($rule_id);
 
-    $category_ids = asgc_get_rule_category_condition_ids($rule_id);
-
-    if (empty($category_ids)) {
-        return true;
-    }
-
-    $post_category_ids = wp_get_post_categories($post_id, array('fields' => 'ids'));
-
-    return !empty(array_intersect($category_ids, array_map('absint', $post_category_ids)));
-}
-
-function asgc_get_rule_category_condition_ids(int $rule_id): array
-{
-    $category_ids = array();
-    $conditions = get_field('asgc_rule_category_conditions', $rule_id);
-
-    if (is_array($conditions)) {
-        foreach ($conditions as $condition) {
-            if (!empty($condition['category'])) {
-                $category_ids[] = absint($condition['category']);
-            }
-        }
-    }
-
-    if (!empty($category_ids)) {
-        return array_values(array_unique(array_filter($category_ids)));
-    }
-
-    return array_values(array_unique(array_filter(array_map('absint', (array) get_field('asgc_rule_post_categories', $rule_id)))));
-}
-
-function asgc_rule_meta_conditions_match(int $rule_id, int $post_id): bool
-{
-    $conditions = get_field('asgc_rule_meta_conditions', $rule_id);
-
-    if (empty($conditions) || !is_array($conditions)) {
+    if (empty($conditions)) {
         return true;
     }
 
@@ -255,6 +214,13 @@ function asgc_rule_meta_conditions_match(int $rule_id, int $post_id): bool
     $results = array();
 
     foreach ($conditions as $condition) {
+        $type = isset($condition['type']) ? sanitize_key((string) $condition['type']) : 'meta';
+
+        if ('category' === $type) {
+            $results[] = asgc_category_condition_matches_post($post_id, absint($condition['category'] ?? 0));
+            continue;
+        }
+
         $meta_key = isset($condition['key']) ? trim(sanitize_text_field((string) $condition['key'])) : '';
 
         if ('' === $meta_key) {
@@ -274,6 +240,80 @@ function asgc_rule_meta_conditions_match(int $rule_id, int $post_id): bool
     }
 
     return 'any' === $mode ? in_array(true, $results, true) : !in_array(false, $results, true);
+}
+
+function asgc_get_rule_conditions(int $rule_id): array
+{
+    $conditions = get_field('asgc_rule_conditions', $rule_id);
+
+    if (is_array($conditions) && !empty($conditions)) {
+        return $conditions;
+    }
+
+    return array_merge(
+        asgc_get_legacy_rule_category_conditions($rule_id),
+        asgc_get_legacy_rule_meta_conditions($rule_id)
+    );
+}
+
+function asgc_get_legacy_rule_category_conditions(int $rule_id): array
+{
+    $conditions = array();
+    $legacy_repeater = get_field('asgc_rule_category_conditions', $rule_id);
+
+    if (is_array($legacy_repeater)) {
+        foreach ($legacy_repeater as $condition) {
+            if (!empty($condition['category'])) {
+                $conditions[] = array(
+                    'type'     => 'category',
+                    'category' => absint($condition['category']),
+                );
+            }
+        }
+    }
+
+    foreach ((array) get_field('asgc_rule_post_categories', $rule_id) as $category_id) {
+        if (absint($category_id) > 0) {
+            $conditions[] = array(
+                'type'     => 'category',
+                'category' => absint($category_id),
+            );
+        }
+    }
+
+    return $conditions;
+}
+
+function asgc_get_legacy_rule_meta_conditions(int $rule_id): array
+{
+    $conditions = get_field('asgc_rule_meta_conditions', $rule_id);
+
+    if (!is_array($conditions)) {
+        return array();
+    }
+
+    return array_map(
+        static function (array $condition): array {
+            $condition['type'] = 'meta';
+            return $condition;
+        },
+        $conditions
+    );
+}
+
+function asgc_category_condition_matches_post(int $post_id, int $category_id): bool
+{
+    if ('post' !== get_post_type($post_id)) {
+        return false;
+    }
+
+    if ($category_id <= 0) {
+        return false;
+    }
+
+    $post_category_ids = wp_get_post_categories($post_id, array('fields' => 'ids'));
+
+    return in_array($category_id, array_map('absint', $post_category_ids), true);
 }
 
 function asgc_meta_condition_matches_post(int $post_id, string $meta_key, string $operator, string $expected_value): bool

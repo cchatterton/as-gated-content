@@ -2,6 +2,11 @@
 
 All notable changes to AS Gated Content are recorded here.
 
+## 0.2.3 - 2026-08-13
+
+- Replaced separate rule condition repeaters with a single Conditions repeater for category and meta matches.
+- Updated rule matching so the Condition mode applies across unified condition rows.
+
 ## 0.2.2 - 2026-08-13
 
 - Removed the unused hidden Overlay Mode field from Gate settings.
