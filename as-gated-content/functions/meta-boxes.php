@@ -18,7 +18,8 @@ add_filter('acf/validate_value/name=asgc_gate_gravity_form_id', 'asgc_validate_g
 add_filter('acf/validate_value/name=asgc_content_gate_id', 'asgc_validate_gate_reference_field', 10, 4);
 add_filter('acf/validate_value/name=asgc_rule_gate_id', 'asgc_validate_gate_reference_field', 10, 4);
 add_filter('acf/validate_value/name=asgc_rule_post_type', 'asgc_validate_gate_rule_post_type_field', 10, 4);
-add_filter('acf/validate_value/name=asgc_rule_post_type', 'asgc_validate_unique_gate_rule_field', 20, 4);
+add_filter('acf/validate_value/name=asgc_content_gate_behavior', 'asgc_validate_content_gate_behavior_field', 10, 4);
+add_filter('acf/validate_value/name=asgc_rule_condition_mode', 'asgc_validate_condition_mode_field', 10, 4);
 add_filter('acf/validate_value/name=asgc_content_trigger', 'asgc_validate_trigger_field', 10, 4);
 add_filter('acf/validate_value/name=asgc_rule_trigger', 'asgc_validate_trigger_field', 10, 4);
 add_filter('acf/validate_value/name=asgc_content_delay', 'asgc_validate_non_negative_integer_field', 10, 4);
@@ -32,9 +33,12 @@ add_filter('acf/update_value/name=asgc_content_delay', 'asgc_update_non_negative
 add_filter('acf/update_value/name=asgc_rule_delay', 'asgc_update_non_negative_integer_value', 10, 3);
 add_filter('acf/update_value/name=asgc_content_threshold', 'asgc_update_non_negative_integer_value', 10, 3);
 add_filter('acf/update_value/name=asgc_rule_threshold', 'asgc_update_non_negative_integer_value', 10, 3);
+add_filter('acf/update_value/name=asgc_rule_priority', 'asgc_update_integer_value', 10, 3);
 add_filter('acf/update_value/name=asgc_content_trigger', 'asgc_update_trigger_value', 10, 3);
 add_filter('acf/update_value/name=asgc_rule_trigger', 'asgc_update_trigger_value', 10, 3);
 add_filter('acf/update_value/name=asgc_rule_post_type', 'asgc_update_post_type_value', 10, 3);
+add_filter('acf/update_value/name=asgc_content_gate_behavior', 'asgc_update_content_gate_behavior_value', 10, 3);
+add_filter('acf/update_value/name=asgc_rule_condition_mode', 'asgc_update_condition_mode_value', 10, 3);
 
 function asgc_register_acf_fields(): void
 {
@@ -134,6 +138,32 @@ function asgc_get_gate_configuration_fields(string $context): array
 
     if ($is_rule) {
         $fields[] = array(
+            'key'       => 'field_asgc_rule_tab_rule',
+            'label'     => __('Rule', 'as-gated-content'),
+            'name'      => '',
+            'type'      => 'tab',
+            'placement' => 'top',
+        );
+        $fields[] = array(
+            'key'           => 'field_asgc_rule_active',
+            'label'         => __('Rule active', 'as-gated-content'),
+            'name'          => 'asgc_rule_active',
+            'type'          => 'true_false',
+            'default_value' => 1,
+            'ui'            => 1,
+            'wrapper'       => array('width' => '20'),
+        );
+        $fields[] = array(
+            'key'           => 'field_asgc_rule_priority',
+            'label'         => __('Rule priority', 'as-gated-content'),
+            'name'          => 'asgc_rule_priority',
+            'type'          => 'number',
+            'default_value' => 0,
+            'step'          => 1,
+            'instructions'  => __('Higher priority rules win when more than one rule matches the same content.', 'as-gated-content'),
+            'wrapper'       => array('width' => '20'),
+        );
+        $fields[] = array(
             'key'           => 'field_asgc_rule_post_type',
             'label'         => __('Applies to content type', 'as-gated-content'),
             'name'          => 'asgc_rule_post_type',
@@ -143,6 +173,152 @@ function asgc_get_gate_configuration_fields(string $context): array
             'allow_null'    => 1,
             'ui'            => 1,
             'return_format' => 'value',
+            'wrapper'       => array('width' => '30'),
+        );
+        $fields[] = array(
+            'key'               => 'field_asgc_rule_post_categories',
+            'label'             => __('Post categories', 'as-gated-content'),
+            'name'              => 'asgc_rule_post_categories',
+            'type'              => 'taxonomy',
+            'taxonomy'          => 'category',
+            'field_type'        => 'multi_select',
+            'return_format'     => 'id',
+            'add_term'          => 0,
+            'save_terms'        => 0,
+            'load_terms'        => 0,
+            'multiple'          => 1,
+            'allow_null'        => 1,
+            'instructions'      => __('Optional. If selected, this rule only matches posts with at least one selected category.', 'as-gated-content'),
+            'conditional_logic' => array(
+                array(
+                    array(
+                        'field'    => 'field_asgc_rule_post_type',
+                        'operator' => '==',
+                        'value'    => 'post',
+                    ),
+                ),
+            ),
+        );
+    }
+
+    if (!$is_rule) {
+        $fields[] = array(
+            'key'       => 'field_asgc_content_tab_gate_behavior',
+            'label'     => __('Gate Behaviour', 'as-gated-content'),
+            'name'      => '',
+            'type'      => 'tab',
+            'placement' => 'top',
+        );
+        $fields[] = array(
+            'key'           => 'field_asgc_content_gate_behavior',
+            'label'         => __('Gate behaviour', 'as-gated-content'),
+            'name'          => 'asgc_content_gate_behavior',
+            'type'          => 'radio',
+            'choices'       => array(
+                'inherit'  => __('Inherit gate rules', 'as-gated-content'),
+                'override' => __('Use a specific gate', 'as-gated-content'),
+                'disable'  => __('Disable gates for this content', 'as-gated-content'),
+            ),
+            'default_value' => 'inherit',
+            'layout'        => 'vertical',
+            'return_format' => 'value',
+        );
+        $fields[] = array(
+            'key'     => 'field_asgc_content_effective_gate',
+            'label'   => __('Effective gate', 'as-gated-content'),
+            'name'    => 'asgc_content_effective_gate',
+            'type'    => 'message',
+            'message' => asgc_get_content_effective_gate_message(),
+        );
+    }
+
+    if ($is_rule) {
+        $fields[] = array(
+            'key'       => 'field_asgc_rule_tab_conditions',
+            'label'     => __('Conditions', 'as-gated-content'),
+            'name'      => '',
+            'type'      => 'tab',
+            'placement' => 'top',
+        );
+        $fields[] = array(
+            'key'           => 'field_asgc_rule_condition_mode',
+            'label'         => __('Condition mode', 'as-gated-content'),
+            'name'          => 'asgc_rule_condition_mode',
+            'type'          => 'select',
+            'choices'       => array(
+                'all' => __('Match all conditions', 'as-gated-content'),
+                'any' => __('Match any condition', 'as-gated-content'),
+            ),
+            'default_value' => 'all',
+            'return_format' => 'value',
+            'ui'            => 0,
+        );
+        $fields[] = array(
+            'key'          => 'field_asgc_rule_meta_conditions',
+            'label'        => __('Meta conditions', 'as-gated-content'),
+            'name'         => 'asgc_rule_meta_conditions',
+            'type'         => 'repeater',
+            'layout'       => 'table',
+            'button_label' => __('Add meta condition', 'as-gated-content'),
+            'sub_fields'   => array(
+                array(
+                    'key'   => 'field_asgc_rule_meta_condition_key',
+                    'label' => __('Meta key', 'as-gated-content'),
+                    'name'  => 'key',
+                    'type'  => 'text',
+                ),
+                array(
+                    'key'           => 'field_asgc_rule_meta_condition_operator',
+                    'label'         => __('Operator', 'as-gated-content'),
+                    'name'          => 'operator',
+                    'type'          => 'select',
+                    'choices'       => array(
+                        'equals'           => __('equals', 'as-gated-content'),
+                        'not_equals'       => __('does not equal', 'as-gated-content'),
+                        'contains'         => __('contains', 'as-gated-content'),
+                        'not_contains'     => __('does not contain', 'as-gated-content'),
+                        'exists'           => __('exists', 'as-gated-content'),
+                        'not_exists'       => __('does not exist', 'as-gated-content'),
+                        'greater_than'     => __('greater than', 'as-gated-content'),
+                        'less_than'        => __('less than', 'as-gated-content'),
+                    ),
+                    'default_value' => 'equals',
+                    'return_format' => 'value',
+                ),
+                array(
+                    'key'   => 'field_asgc_rule_meta_condition_value',
+                    'label' => __('Value', 'as-gated-content'),
+                    'name'  => 'value',
+                    'type'  => 'text',
+                ),
+            ),
+        );
+    }
+
+    if ($is_rule) {
+        $fields[] = array(
+            'key'       => 'field_asgc_rule_tab_gate',
+            'label'     => __('Gate', 'as-gated-content'),
+            'name'      => '',
+            'type'      => 'tab',
+            'placement' => 'top',
+        );
+    } else {
+        $fields[] = array(
+            'key'               => 'field_asgc_content_tab_override_gate',
+            'label'             => __('Override Gate', 'as-gated-content'),
+            'name'              => '',
+            'type'              => 'tab',
+            'placement'         => 'top',
+            'conditional_logic' => array(
+                array(
+                    array(
+                        'field'    => 'field_asgc_content_gate_behavior',
+                        'operator' => '==',
+                        'value'    => 'override',
+                    ),
+                ),
+            ),
         );
     }
 
@@ -156,13 +332,23 @@ function asgc_get_gate_configuration_fields(string $context): array
         'allow_null'    => 1,
         'ui'            => 1,
         'return_format' => 'value',
+        'conditional_logic' => $is_rule ? 0 : array(
+            array(
+                array(
+                    'field'    => 'field_asgc_content_gate_behavior',
+                    'operator' => '==',
+                    'value'    => 'override',
+                ),
+            ),
+        ),
     );
 
     $conditional_logic = $is_rule ? 0 : array(
         array(
             array(
-                'field'    => 'field_asgc_content_gate_id',
-                'operator' => '!=empty',
+                'field'    => 'field_asgc_content_gate_behavior',
+                'operator' => '==',
+                'value'    => 'override',
             ),
         ),
     );
@@ -267,7 +453,15 @@ function asgc_validate_gravity_form_field($valid, $value, array $field, string $
 
 function asgc_validate_gate_reference_field($valid, $value, array $field, string $input)
 {
-    if (true !== $valid || empty($value)) {
+    if (true !== $valid) {
+        return $valid;
+    }
+
+    if (empty($value)) {
+        if ('asgc_content_gate_id' === ($field['name'] ?? '') && asgc_content_gate_behavior_from_request() === 'override') {
+            return __('Select a Gate for this content override.', 'as-gated-content');
+        }
+
         return $valid;
     }
 
@@ -293,31 +487,27 @@ function asgc_validate_gate_rule_post_type_field($valid, $value, array $field, s
     return true;
 }
 
-function asgc_validate_unique_gate_rule_field($valid, $value, array $field, string $input)
+function asgc_validate_content_gate_behavior_field($valid, $value, array $field, string $input)
 {
-    if (true !== $valid || empty($value)) {
+    if (true !== $valid) {
         return $valid;
     }
 
-    $current_post_id = isset($_POST['post_ID']) ? absint($_POST['post_ID']) : 0;
-    $existing_rules = get_posts(
-        array(
-            'post_type'      => 'gate_rule',
-            'post_status'    => array('publish', 'draft', 'pending', 'private'),
-            'posts_per_page' => 1,
-            'post__not_in'   => $current_post_id > 0 ? array($current_post_id) : array(),
-            'meta_query'     => array(
-                array(
-                    'key'   => 'asgc_rule_post_type',
-                    'value' => sanitize_key($value),
-                ),
-            ),
-            'fields'         => 'ids',
-        )
-    );
+    if (!in_array($value, array('inherit', 'override', 'disable'), true)) {
+        return __('Select a valid gate behaviour.', 'as-gated-content');
+    }
 
-    if (!empty($existing_rules)) {
-        return __('A Gate Rule already exists for this content type.', 'as-gated-content');
+    return true;
+}
+
+function asgc_validate_condition_mode_field($valid, $value, array $field, string $input)
+{
+    if (true !== $valid) {
+        return $valid;
+    }
+
+    if (!in_array($value, array('all', 'any'), true)) {
+        return __('Select a valid condition mode.', 'as-gated-content');
     }
 
     return true;
@@ -355,10 +545,15 @@ function asgc_content_gate_context_is_empty(array $field): bool
         return false;
     }
 
-    $content_gate_key = 'field_asgc_content_gate_id';
-    $acf_values = isset($_POST['acf']) && is_array($_POST['acf']) ? $_POST['acf'] : array();
+    return asgc_content_gate_behavior_from_request() !== 'override';
+}
 
-    return empty($acf_values[$content_gate_key]);
+function asgc_content_gate_behavior_from_request(): string
+{
+    $acf_values = isset($_POST['acf']) && is_array($_POST['acf']) ? $_POST['acf'] : array();
+    $value = isset($acf_values['field_asgc_content_gate_behavior']) ? sanitize_key($acf_values['field_asgc_content_gate_behavior']) : 'inherit';
+
+    return in_array($value, array('inherit', 'override', 'disable'), true) ? $value : 'inherit';
 }
 
 function asgc_update_integer_value($value, int $post_id, array $field): int
@@ -379,4 +574,52 @@ function asgc_update_trigger_value($value, int $post_id, array $field): string
 function asgc_update_post_type_value($value, int $post_id, array $field): string
 {
     return sanitize_key($value);
+}
+
+function asgc_update_content_gate_behavior_value($value, int $post_id, array $field): string
+{
+    return asgc_sanitize_content_gate_behavior($value);
+}
+
+function asgc_update_condition_mode_value($value, int $post_id, array $field): string
+{
+    return in_array($value, array('all', 'any'), true) ? $value : 'all';
+}
+
+function asgc_get_content_effective_gate_message(): string
+{
+    $post_id = isset($_GET['post']) ? absint($_GET['post']) : 0;
+
+    if ($post_id <= 0) {
+        return esc_html__('Save this content to preview the effective gate.', 'as-gated-content');
+    }
+
+    if (asgc_sanitize_content_gate_behavior(get_field('asgc_content_gate_behavior', $post_id)) === 'disable') {
+        return esc_html__('Gates are disabled for this content.', 'as-gated-content');
+    }
+
+    if (!function_exists('asgc_resolve_gate_for_post')) {
+        return esc_html__('The effective gate is calculated on the front end.', 'as-gated-content');
+    }
+
+    $config = asgc_resolve_gate_for_post($post_id);
+
+    if (empty($config)) {
+        return esc_html__('No gate will apply to this content.', 'as-gated-content');
+    }
+
+    $gate_title = isset($config['gate_id']) ? get_the_title(absint($config['gate_id'])) : '';
+
+    if ('post' === ($config['source'] ?? '')) {
+        return sprintf(
+            esc_html__('This content overrides inherited rules and uses: %s.', 'as-gated-content'),
+            esc_html($gate_title ?: __('Untitled gate', 'as-gated-content'))
+        );
+    }
+
+    return sprintf(
+        esc_html__('This content inherits: %1$s from Gate Rule #%2$d.', 'as-gated-content'),
+        esc_html($gate_title ?: __('Untitled gate', 'as-gated-content')),
+        absint($config['rule_id'] ?? 0)
+    );
 }

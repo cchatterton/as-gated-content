@@ -2,6 +2,14 @@
 
 All notable changes to AS Gated Content are recorded here.
 
+## 0.2.0 - 2026-08-13
+
+- Added content-level gate behaviour controls for inherit, override, and disable gates.
+- Added prioritized Gate Rules with current-content matching.
+- Added optional post category targeting for post Gate Rules.
+- Added advanced meta condition matching with all/any logic.
+- Updated rule resolution so the highest-priority matching rule wins.
+
 ## 0.1.2 - 2026-06-18
 
 - Fixed exit-intent threshold handling so repeated leave attempts can count until the modal opens.

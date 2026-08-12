@@ -103,6 +103,32 @@ function asgc_sanitize_trigger($value): string
     return in_array($value, array('entrance', 'exit'), true) ? $value : 'entrance';
 }
 
+function asgc_sanitize_content_gate_behavior($value): string
+{
+    return in_array($value, array('inherit', 'override', 'disable'), true) ? $value : 'inherit';
+}
+
+function asgc_sanitize_condition_mode($value): string
+{
+    return in_array($value, array('all', 'any'), true) ? $value : 'all';
+}
+
+function asgc_sanitize_meta_operator($value): string
+{
+    $operators = array(
+        'equals',
+        'not_equals',
+        'contains',
+        'not_contains',
+        'exists',
+        'not_exists',
+        'greater_than',
+        'less_than',
+    );
+
+    return in_array($value, $operators, true) ? $value : 'equals';
+}
+
 function asgc_sanitize_non_negative_integer($value): int
 {
     return max(0, absint($value));

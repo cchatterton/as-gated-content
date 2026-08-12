@@ -22,7 +22,7 @@ Reusable gated content overlays for WordPress, built for AlphaSys.
 
 ## Release
 
-Current version: 0.1.2
+Current version: 0.2.0
 
 Build the installable ZIP with:
 
