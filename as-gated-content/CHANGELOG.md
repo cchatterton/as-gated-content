@@ -2,6 +2,10 @@
 
 All notable changes to AS Gated Content are recorded here.
 
+## 0.2.2 - 2026-08-13
+
+- Removed the unused hidden Overlay Mode field from Gate settings.
+
 ## 0.2.1 - 2026-08-13
 
 - Moved Gate Rule post category targeting into a Conditions tab repeater.

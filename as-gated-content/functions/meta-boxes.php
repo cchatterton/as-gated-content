@@ -63,13 +63,6 @@ function asgc_register_acf_fields(): void
                     'return_format' => 'value',
                 ),
                 array(
-                    'key'           => 'field_asgc_gate_overlay_mode',
-                    'label'         => __('Overlay Mode', 'as-gated-content'),
-                    'name'          => 'asgc_gate_overlay_mode',
-                    'type'          => 'hidden',
-                    'default_value' => 'fullscreen',
-                ),
-                array(
                     'key'     => 'field_asgc_gate_entries_link',
                     'label'   => __('View Entries', 'as-gated-content'),
                     'name'    => 'asgc_gate_entries_link',
