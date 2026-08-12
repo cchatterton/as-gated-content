@@ -160,7 +160,6 @@ function asgc_get_gate_configuration_fields(string $context): array
             'type'          => 'number',
             'default_value' => 0,
             'step'          => 1,
-            'instructions'  => __('Higher priority rules win when more than one rule matches the same content.', 'as-gated-content'),
             'wrapper'       => array('width' => '20'),
         );
         $fields[] = array(
@@ -174,30 +173,6 @@ function asgc_get_gate_configuration_fields(string $context): array
             'ui'            => 1,
             'return_format' => 'value',
             'wrapper'       => array('width' => '30'),
-        );
-        $fields[] = array(
-            'key'               => 'field_asgc_rule_post_categories',
-            'label'             => __('Post categories', 'as-gated-content'),
-            'name'              => 'asgc_rule_post_categories',
-            'type'              => 'taxonomy',
-            'taxonomy'          => 'category',
-            'field_type'        => 'multi_select',
-            'return_format'     => 'id',
-            'add_term'          => 0,
-            'save_terms'        => 0,
-            'load_terms'        => 0,
-            'multiple'          => 1,
-            'allow_null'        => 1,
-            'instructions'      => __('Optional. If selected, this rule only matches posts with at least one selected category.', 'as-gated-content'),
-            'conditional_logic' => array(
-                array(
-                    array(
-                        'field'    => 'field_asgc_rule_post_type',
-                        'operator' => '==',
-                        'value'    => 'post',
-                    ),
-                ),
-            ),
         );
     }
 
@@ -290,6 +265,38 @@ function asgc_get_gate_configuration_fields(string $context): array
                     'label' => __('Value', 'as-gated-content'),
                     'name'  => 'value',
                     'type'  => 'text',
+                ),
+            ),
+        );
+        $fields[] = array(
+            'key'               => 'field_asgc_rule_category_conditions',
+            'label'             => __('Category conditions', 'as-gated-content'),
+            'name'              => 'asgc_rule_category_conditions',
+            'type'              => 'repeater',
+            'layout'            => 'table',
+            'button_label'      => __('Add category condition', 'as-gated-content'),
+            'conditional_logic' => array(
+                array(
+                    array(
+                        'field'    => 'field_asgc_rule_post_type',
+                        'operator' => '==',
+                        'value'    => 'post',
+                    ),
+                ),
+            ),
+            'sub_fields'        => array(
+                array(
+                    'key'           => 'field_asgc_rule_category_condition_category',
+                    'label'         => __('Category', 'as-gated-content'),
+                    'name'          => 'category',
+                    'type'          => 'taxonomy',
+                    'taxonomy'      => 'category',
+                    'field_type'    => 'select',
+                    'return_format' => 'id',
+                    'add_term'      => 0,
+                    'save_terms'    => 0,
+                    'load_terms'    => 0,
+                    'allow_null'    => 1,
                 ),
             ),
         );

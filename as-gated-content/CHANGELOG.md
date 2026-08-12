@@ -2,6 +2,11 @@
 
 All notable changes to AS Gated Content are recorded here.
 
+## 0.2.1 - 2026-08-13
+
+- Moved Gate Rule post category targeting into a Conditions tab repeater.
+- Removed the Rule priority instructional text from the admin interface.
+
 ## 0.2.0 - 2026-08-13
 
 - Added content-level gate behaviour controls for inherit, override, and disable gates.

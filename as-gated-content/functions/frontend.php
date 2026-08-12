@@ -212,7 +212,7 @@ function asgc_rule_category_conditions_match(int $rule_id, int $post_id): bool
         return true;
     }
 
-    $category_ids = array_filter(array_map('absint', (array) get_field('asgc_rule_post_categories', $rule_id)));
+    $category_ids = asgc_get_rule_category_condition_ids($rule_id);
 
     if (empty($category_ids)) {
         return true;
@@ -221,6 +221,26 @@ function asgc_rule_category_conditions_match(int $rule_id, int $post_id): bool
     $post_category_ids = wp_get_post_categories($post_id, array('fields' => 'ids'));
 
     return !empty(array_intersect($category_ids, array_map('absint', $post_category_ids)));
+}
+
+function asgc_get_rule_category_condition_ids(int $rule_id): array
+{
+    $category_ids = array();
+    $conditions = get_field('asgc_rule_category_conditions', $rule_id);
+
+    if (is_array($conditions)) {
+        foreach ($conditions as $condition) {
+            if (!empty($condition['category'])) {
+                $category_ids[] = absint($condition['category']);
+            }
+        }
+    }
+
+    if (!empty($category_ids)) {
+        return array_values(array_unique(array_filter($category_ids)));
+    }
+
+    return array_values(array_unique(array_filter(array_map('absint', (array) get_field('asgc_rule_post_categories', $rule_id)))));
 }
 
 function asgc_rule_meta_conditions_match(int $rule_id, int $post_id): bool
