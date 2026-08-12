@@ -14,6 +14,7 @@ add_filter('gform_pre_render', 'asgc_add_gate_context_hidden_field');
 add_filter('gform_pre_validation', 'asgc_add_gate_context_hidden_field');
 add_filter('gform_pre_submission_filter', 'asgc_add_gate_context_hidden_field');
 add_filter('gform_admin_pre_render', 'asgc_add_gate_context_hidden_field');
+add_action('gform_after_submission', 'asgc_record_independent_analytics_gate_submission', 20, 2);
 
 function asgc_show_dependency_admin_notices(): void
 {
@@ -74,4 +75,46 @@ function asgc_get_next_gravity_form_field_id(array $form): int
     }
 
     return $max_id + 1;
+}
+
+function asgc_record_independent_analytics_gate_submission(array $entry, array $form): void
+{
+    if (!has_action('iawp_custom_form_submissions')) {
+        return;
+    }
+
+    $gate_id = asgc_get_gate_id_from_gravity_forms_entry($entry, $form);
+
+    if ($gate_id <= 0 || 'gate' !== get_post_type($gate_id)) {
+        return;
+    }
+
+    $gate_title = get_the_title($gate_id) ?: sprintf(__('Gate #%d', 'as-gated-content'), $gate_id);
+
+    do_action(
+        'iawp_custom_form_submissions',
+        $gate_id,
+        sprintf(__('Gate: %s', 'as-gated-content'), $gate_title)
+    );
+}
+
+function asgc_get_gate_id_from_gravity_forms_entry(array $entry, array $form): int
+{
+    if (empty($form['fields']) || !is_array($form['fields'])) {
+        return 0;
+    }
+
+    foreach ($form['fields'] as $field) {
+        if (!isset($field->inputName) || 'asgc_gate_id' !== $field->inputName) {
+            continue;
+        }
+
+        $field_id = (string) $field->id;
+
+        if (isset($entry[$field_id])) {
+            return absint($entry[$field_id]);
+        }
+    }
+
+    return 0;
 }

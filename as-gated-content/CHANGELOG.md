@@ -2,6 +2,10 @@
 
 All notable changes to AS Gated Content are recorded here.
 
+## 0.2.5 - 2026-08-13
+
+- Added optional Independent Analytics Pro gate conversion tracking through custom form submissions.
+
 ## 0.2.4 - 2026-08-13
 
 - Added admin-only front-end gate debug and preview controls.
