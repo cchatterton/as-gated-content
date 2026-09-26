@@ -19,3 +19,7 @@ Reusable gated content overlays for WordPress, built for AlphaSys.
 - Delay and trigger-threshold controls.
 - Visitor suppression after successful Gravity Forms submission.
 - Native GitHub release updater support.
+
+## Controller integration — 0.2.6
+
+Remove independent GitHub update checks and delegate updates to AlphaSys Update Controller. Keep Beta readiness and existing feature settings, package identity and domain restrictions. Previous standalone GitHub update instructions are superseded.

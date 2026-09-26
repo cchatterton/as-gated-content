@@ -29,3 +29,7 @@ Build the installable ZIP with:
 ```bash
 ./scripts/build-plugin-zip.sh
 ```
+
+## Controller integration — 0.2.6
+
+Remove independent GitHub update checks and delegate updates to AlphaSys Update Controller. Keep Beta readiness and existing feature settings, package identity and domain restrictions. Previous standalone GitHub update instructions are superseded.
